@@ -102,5 +102,40 @@ class SearchViewsTests(TestCase):
             manufacturer=cls.m2
         )
 
+    def test_driver_search_by_username(self):
+        url = reverse("taxi:driver-list")
+        resp = self.client.get(url, {"username": "bob"})
+        self.assertEqual(resp.status_code, 200)
+
+        drivers = list(resp.context["driver_list"])
+        self.assertEqual(drivers, [self.driver2])
+        self.assertContains(resp, self.driver2.username)
+
+    def test_car_search_by_model(self):
+        url = reverse("taxi:car-list")
+        resp = self.client.get(url, {"model": "model"})
+        self.assertEqual(resp.status_code, 200)
+
+        cars = list(resp.context["car_list"])
+        self.assertEqual(cars, [self.c1])
+        self.assertContains(resp, self.c1.model)
+
+    def test_manufacturer_search_by_name(self):
+        url = reverse("taxi:manufacturer-list")
+        resp = self.client.get(url, {"name": "merc"})
+        self.assertEqual(resp.status_code, 200)
+
+        manufacturers = list(resp.context["manufacturer_list"])
+        self.assertEqual(manufacturers, [self.m2])
+        self.assertContains(resp, self.m2.name)
+
+    def test_empty_query_returns_all(self):
+        url = reverse("taxi:car-list")
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        cars = list(resp.context["car_list"])
+        self.assertEqual(set(cars), {self.c1, self.c2})
+
     def setUp(self):
         self.client.login(username="alice", password="p")
